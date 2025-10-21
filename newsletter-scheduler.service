@@ -1,0 +1,19 @@
+[Unit]
+Description=NSE/BSE Daily Newsletter Scheduler
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/nse-bse-newsletter
+ExecStart=/usr/bin/python3 /home/YOUR_USERNAME/nse-bse-newsletter/scheduler.py
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/YOUR_USERNAME/nse-bse-newsletter/logs/systemd.log
+StandardError=append:/home/YOUR_USERNAME/nse-bse-newsletter/logs/systemd.log
+
+# Environment
+Environment="PYTHONUNBUFFERED=1"
+
+[Install]
+WantedBy=multi-user.target
