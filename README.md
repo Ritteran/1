@@ -18,6 +18,12 @@ A comprehensive Python webscraper for extracting circulars, daily reports, annou
 - News updates
 - Equity Bhavcopy (ZIP format)
 
+### Automated Daily Newsletter
+- **NEW**: Schedule daily scraping at a fixed time
+- Automatic email delivery via Gmail
+- Plain text summary of all market data
+- Error notifications if scraping fails
+
 ## Installation
 
 ### Prerequisites
@@ -47,15 +53,20 @@ pip install -r requirements.txt
 
 ```
 .
-├── main.py              # Main script with CLI interface
-├── nse_scraper.py       # NSE scraper implementation
-├── bse_scraper.py       # BSE scraper implementation
-├── base_scraper.py      # Base scraper class with common functionality
-├── config.py            # Configuration settings
-├── requirements.txt     # Python dependencies
-├── .gitignore          # Git ignore file
-├── data/               # Output directory (created automatically)
-└── logs/               # Log files directory (created automatically)
+├── main.py                   # Main script with CLI interface
+├── scheduler.py              # Daily newsletter scheduler (NEW!)
+├── email_sender.py           # Email sending module (NEW!)
+├── newsletter_formatter.py   # Newsletter formatter (NEW!)
+├── nse_scraper.py            # NSE scraper implementation
+├── bse_scraper.py            # BSE scraper implementation
+├── base_scraper.py           # Base scraper class with common functionality
+├── config.py                 # Configuration settings
+├── requirements.txt          # Python dependencies
+├── .env.example              # Example environment configuration (NEW!)
+├── .env                      # Your email credentials (create this)
+├── .gitignore               # Git ignore file
+├── data/                    # Output directory (created automatically)
+└── logs/                    # Log files directory (created automatically)
 ```
 
 ## Usage
@@ -151,6 +162,126 @@ actions = scraper.scrape_corporate_actions()
 scraper.save_to_file(circulars, 'bse_circulars.json', 'json')
 ```
 
+## Automated Daily Newsletter (NEW!)
+
+The scraper now supports automated daily newsletters sent via email at a scheduled time.
+
+### Setup Instructions
+
+#### 1. Configure Gmail App Password
+
+To send emails via Gmail, you need to create an App Password:
+
+1. Go to your Google Account: https://myaccount.google.com/
+2. Enable **2-Step Verification** if not already enabled
+3. Go to **App Passwords**: https://myaccount.google.com/apppasswords
+4. Select "Mail" and "Other (Custom name)"
+5. Name it "NSE/BSE Scraper" and click Generate
+6. Copy the 16-digit password (save it securely)
+
+#### 2. Create Environment Configuration
+
+1. Copy the example environment file:
+```bash
+cp .env.example .env
+```
+
+2. Edit `.env` and add your credentials:
+```bash
+# Your Gmail address
+GMAIL_ADDRESS=your.email@gmail.com
+
+# The 16-digit app password you just generated
+GMAIL_APP_PASSWORD=abcd efgh ijkl mnop
+
+# Newsletter recipient (already set to benjamin.prajwal57@gmail.com)
+RECIPIENT_EMAIL=benjamin.prajwal57@gmail.com
+```
+
+#### 3. Run the Scheduler
+
+**Start the daily scheduler** (runs at 3:45 PM every day):
+```bash
+python scheduler.py
+```
+
+The scheduler will:
+- Run automatically every day at 3:45 PM
+- Scrape all available NSE/BSE data
+- Generate a plain text summary
+- Email the newsletter to the configured recipient
+- Save all data to the `data/` directory
+- Log all activities to `logs/scheduler.log`
+
+**Keep the scheduler running** in the background using one of these methods:
+
+**Option 1: Using screen (recommended)**
+```bash
+screen -S scraper
+python scheduler.py
+# Press Ctrl+A, then D to detach
+# To reattach: screen -r scraper
+```
+
+**Option 2: Using nohup**
+```bash
+nohup python scheduler.py > scheduler_output.log 2>&1 &
+```
+
+**Option 3: Using tmux**
+```bash
+tmux new -s scraper
+python scheduler.py
+# Press Ctrl+B, then D to detach
+# To reattach: tmux attach -t scraper
+```
+
+#### 4. Test the Newsletter
+
+To test the newsletter without waiting for the scheduled time:
+```bash
+python scheduler.py --now
+```
+
+This will run the scraper immediately and send a test newsletter.
+
+### Newsletter Contents
+
+The daily newsletter includes:
+
+- **Summary Statistics**: Total items collected from each source
+- **NSE Circulars**: Latest corporate announcements
+- **NSE Announcements**: Recent company filings
+- **NSE Daily Reports**: Market data and statistics
+- **BSE Circulars**: Latest corporate announcements
+- **BSE Corporate Actions**: Dividend, bonus, splits, etc.
+- **BSE News**: Market news updates
+- **BSE Daily Reports**: Market data and statistics
+
+All data is presented in a clean, readable plain text format.
+
+### Scheduler Features
+
+- **Automatic scheduling**: Runs daily at 3:45 PM
+- **Error handling**: Sends error notification emails if scraping fails
+- **Comprehensive logging**: All activities logged to `logs/scheduler.log`
+- **Data persistence**: All scraped data saved to JSON files in `data/` directory
+- **Email notifications**: Plain text summaries sent automatically
+
+### Stopping the Scheduler
+
+To stop the scheduler, simply press `Ctrl+C` if running in foreground, or:
+
+```bash
+# If using screen
+screen -r scraper
+# Then press Ctrl+C
+
+# If using nohup, find and kill the process
+ps aux | grep scheduler.py
+kill <process_id>
+```
+
 ## Output
 
 All scraped data is saved to the `data/` directory in multiple formats:
@@ -232,6 +363,7 @@ You can modify settings in `config.py`:
 - **lxml**: XML/HTML parser
 - **pandas**: Data manipulation and CSV export
 - **python-dotenv**: Environment variable management
+- **apscheduler**: Task scheduling for automated daily runs (NEW!)
 
 ## Contributing
 
