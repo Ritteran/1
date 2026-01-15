@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE/BSE Stock Market Scraper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .section h3 {
+            color: #764ba2;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .steps {
+            counter-reset: step-counter;
+            list-style: none;
+        }
+
+        .steps li {
+            counter-increment: step-counter;
+            margin-bottom: 25px;
+            padding-left: 60px;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .steps li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .feature-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+
+        .command-box {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin: 20px 0;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .command-box code {
+            color: #48bb78;
+        }
+
+        .alert {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            color: #1565c0;
+        }
+
+        .alert-success {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+            color: #2e7d32;
+        }
+
+        .alert-warning {
+            background: #fff3e0;
+            border-left: 5px solid #ff9800;
+            color: #e65100;
+        }
+
+        .config-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #764ba2;
+        }
+
+        .form-group input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-group select,
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .checkbox-label:hover {
+            background: #e9ecef;
+        }
+
+        .output-command {
+            background: #2d3748;
+            color: #48bb78;
+            padding: 25px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            margin: 20px 0;
+            word-wrap: break-word;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .copy-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #38a169;
+        }
+
+        .footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .section {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 NSE/BSE Stock Market Scraper</h1>
+            <p>Extract circulars, reports, and announcements with ease - No coding required!</p>
+        </div>
+
+        <div class="content">
+            <!-- Welcome Section -->
+            <div class="section">
+                <h2>👋 Welcome!</h2>
+                <p style="font-size: 1.1em; line-height: 1.8;">
+                    This tool helps you automatically download stock market data from NSE (National Stock Exchange)
+                    and BSE (Bombay Stock Exchange) websites. Whether you're a researcher, analyst, or enthusiast,
+                    you can collect historical data in just a few clicks!
+                </p>
+                <div class="alert alert-success">
+                    <strong>✨ Great News!</strong> We now have an easy-to-use web interface. No programming knowledge needed!
+                </div>
+            </div>
+
+            <!-- Quick Start Section -->
+            <div class="section">
+                <h2>🚀 Quick Start</h2>
+                <ol class="steps">
+                    <li>
+                        <strong>Install Python</strong><br>
+                        Download from <a href="https://www.python.org/downloads/" target="_blank">python.org</a>
+                        (It's free and easy!)
+                    </li>
+                    <li>
+                        <strong>Launch the Application</strong><br>
+                        <strong>Windows:</strong> Double-click <code>start.bat</code><br>
+                        <strong>Mac/Linux:</strong> Run <code>./start.sh</code> in Terminal
+                    </li>
+                    <li>
+                        <strong>Use the Web Interface</strong><br>
+                        Your browser will open automatically. Just click buttons to select what you want!
+                    </li>
+                    <li>
+                        <strong>Download Your Data</strong><br>
+                        Get your data in CSV, JSON, or Excel format with one click!
+                    </li>
+                </ol>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="showLauncher()">
+                        🖥️ Launch Web Interface
+                    </button>
+                    <button class="btn btn-secondary" onclick="scrollToSection('command-generator')">
+                        ⚡ Command Generator
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="section">
+                <h2>✨ Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">📄</div>
+                        <h3>Circulars</h3>
+                        <p>Download corporate circulars and announcements from both exchanges</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">📊</div>
+                        <h3>Daily Reports</h3>
+                        <p>Get daily market reports and Bhavcopy files automatically</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🎯</div>
+                        <h3>Corporate Actions</h3>
+                        <p>Track dividends, splits, bonuses, and other corporate actions</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">📰</div>
+                        <h3>News Updates</h3>
+                        <p>Stay updated with latest market news from BSE</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">📥</div>
+                        <h3>Multiple Formats</h3>
+                        <p>Export data in CSV, JSON, or Excel format</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🔄</div>
+                        <h3>Auto-Retry</h3>
+                        <p>Built-in retry logic ensures reliable data collection</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Command Generator Section -->
+            <div class="section" id="command-generator">
+                <h2>⚡ Command Generator</h2>
+                <p style="margin-bottom: 20px;">
+                    Configure your settings below and we'll generate the exact command you need to run!
+                </p>
+
+                <div class="config-form">
+                    <div class="form-group">
+                        <label>Select Exchange:</label>
+                        <select id="exchange" onchange="generateCommand()">
+                            <option value="both">Both NSE & BSE</option>
+                            <option value="nse">NSE Only</option>
+                            <option value="bse">BSE Only</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Number of Days:</label>
+                        <input type="number" id="days" value="7" min="1" max="90" onchange="generateCommand()">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Data Types:</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="circulars" checked onchange="generateCommand()">
+                                Circulars & Announcements
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="reports" checked onchange="generateCommand()">
+                                Daily Reports
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="announcements" onchange="generateCommand()">
+                                Announcements (NSE only)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="corporate-actions" onchange="generateCommand()">
+                                Corporate Actions (BSE only)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="news" onchange="generateCommand()">
+                                News (BSE only)
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="bhavcopy" onchange="generateCommand()">
+                                Bhavcopy (Daily Report File)
+                            </label>
+                        </div>
+                    </div>
+
+                    <h3>Generated Command:</h3>
+                    <div class="output-command" id="generated-command">
+                        python main.py --exchange both --circulars --reports --days 7
+                    </div>
+                    <button class="copy-btn" onclick="copyCommand()">📋 Copy Command</button>
+
+                    <div class="alert alert-info" style="margin-top: 20px;">
+                        <strong>How to use:</strong> Copy the command above, open your terminal/command prompt,
+                        navigate to the project folder, and paste the command!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documentation Section -->
+            <div class="section">
+                <h2>📚 Documentation</h2>
+                <h3>For Beginners:</h3>
+                <p>Read the <strong>QUICK_START.md</strong> file - it explains everything in simple terms!</p>
+
+                <h3>For Advanced Users:</h3>
+                <p>Check out <strong>README.md</strong> for complete documentation, command-line options, and developer guides.</p>
+
+                <h3>Example Commands:</h3>
+                <div class="command-box">
+                    <code># Scrape everything from both exchanges<br>
+                    python main.py --exchange both --all</code>
+                </div>
+                <div class="command-box">
+                    <code># Scrape NSE circulars for last 30 days<br>
+                    python main.py --exchange nse --circulars --days 30</code>
+                </div>
+                <div class="command-box">
+                    <code># Launch the web interface<br>
+                    streamlit run app.py</code>
+                </div>
+            </div>
+
+            <!-- Troubleshooting Section -->
+            <div class="section">
+                <h2>🆘 Troubleshooting</h2>
+                <h3>Application won't start?</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Make sure Python is installed: Run <code>python --version</code></li>
+                    <li>Install dependencies: <code>pip install -r requirements.txt</code></li>
+                    <li>Check internet connection</li>
+                </ul>
+
+                <h3>No data returned?</h3>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Verify NSE/BSE websites are accessible</li>
+                    <li>Check the <code>logs/</code> folder for error details</li>
+                    <li>Try a shorter time range (e.g., 7 days)</li>
+                </ul>
+
+                <h3>Browser didn't open?</h3>
+                <p style="margin-left: 20px; margin-top: 10px;">
+                    Manually open your browser and go to: <strong>http://localhost:8501</strong>
+                </p>
+            </div>
+
+            <!-- Support Section -->
+            <div class="section">
+                <h2>💬 Need Help?</h2>
+                <p>If you're stuck or have questions:</p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Check the <strong>QUICK_START.md</strong> guide</li>
+                    <li>Read the <strong>README.md</strong> documentation</li>
+                    <li>Look in the <strong>logs/</strong> folder for error messages</li>
+                    <li>Open an issue on the project repository</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Made with ❤️ for stock market enthusiasts</strong></p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                This tool is for educational and research purposes. Always verify critical data with official sources.
+            </p>
+            <p style="margin-top: 10px;">
+                <a href="https://github.com" target="_blank">GitHub Repository</a> |
+                <a href="mailto:support@example.com">Contact Support</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Generate command based on form inputs
+        function generateCommand() {
+            const exchange = document.getElementById('exchange').value;
+            const days = document.getElementById('days').value;
+
+            const circulars = document.getElementById('circulars').checked;
+            const reports = document.getElementById('reports').checked;
+            const announcements = document.getElementById('announcements').checked;
+            const corporateActions = document.getElementById('corporate-actions').checked;
+            const news = document.getElementById('news').checked;
+            const bhavcopy = document.getElementById('bhavcopy').checked;
+
+            let command = `python main.py --exchange ${exchange}`;
+
+            if (circulars) command += ' --circulars';
+            if (reports) command += ' --reports';
+            if (announcements) command += ' --announcements';
+            if (corporateActions) command += ' --corporate-actions';
+            if (news) command += ' --news';
+            if (bhavcopy) command += ' --bhavcopy';
+
+            command += ` --days ${days}`;
+
+            document.getElementById('generated-command').textContent = command;
+        }
+
+        // Copy command to clipboard
+        function copyCommand() {
+            const command = document.getElementById('generated-command').textContent;
+            navigator.clipboard.writeText(command).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#38a169';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#48bb78';
+                }, 2000);
+            });
+        }
+
+        // Show launcher instructions
+        function showLauncher() {
+            alert('To launch the web interface:\n\n' +
+                  '1. Windows: Double-click "start.bat"\n' +
+                  '2. Mac/Linux: Run "./start.sh" in Terminal\n\n' +
+                  'Your browser will open automatically!');
+        }
+
+        // Scroll to section
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            generateCommand();
+        };
+    </script>
+</body>
+</html>

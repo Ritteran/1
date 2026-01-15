@@ -4,33 +4,44 @@ A user-friendly tool for extracting circulars, daily reports, announcements, and
 
 **✨ NEW: Easy-to-use Web Interface - No coding required!**
 
+> **📄 Want to see what this tool can do?** Just open `index.html` in your browser for a beautiful interactive guide!
+
 ---
 
 ## 🚀 Quick Start (For Non-Technical Users)
 
-### Step 1: Install Python
+### Option 1: Open the HTML Guide (Easiest!)
+Simply double-click the `index.html` file to open it in your web browser. You'll see:
+- Beautiful visual guide
+- Interactive command generator
+- Step-by-step instructions
+- Feature showcase
+
+### Option 2: Launch the Web App Directly
+
+#### Step 1: Install Python
 
 If you don't have Python installed:
 - **Windows/Mac**: Download from [python.org](https://www.python.org/downloads/)
 - **Linux**: Python is usually pre-installed
 
-### Step 2: Download This Project
+#### Step 2: Download This Project
 
 Download and extract the project files to a folder on your computer.
 
-### Step 3: Launch the Application
+#### Step 3: Launch the Application
 
-#### On Windows:
+**On Windows:**
 1. Double-click the `start.bat` file
 2. Wait for the installation to complete (first time only)
 3. Your web browser will open automatically
 
-#### On Mac/Linux:
+**On Mac/Linux:**
 1. Open Terminal in the project folder
 2. Run: `./start.sh`
 3. Your web browser will open automatically
 
-### Step 4: Use the Web Interface
+#### Step 4: Use the Web Interface
 
 1. **Select Exchange**: Choose NSE, BSE, or both
 2. **Select Data Types**: Check the boxes for what you want

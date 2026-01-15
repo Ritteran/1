@@ -6,7 +6,22 @@ This tool downloads stock market data from NSE and BSE websites automatically. Y
 
 ---
 
-## ⚡ Start in 3 Easy Steps
+## 📄 First Time Here? Start with the HTML Guide!
+
+**Easiest way to get started:**
+1. Find the file called `index.html` in the project folder
+2. Double-click it to open in your web browser
+3. You'll see a beautiful guide with:
+   - Easy-to-follow instructions
+   - Interactive command generator
+   - Feature showcase
+   - Troubleshooting tips
+
+**No Python installation needed to view the guide!** It works in any web browser.
+
+---
+
+## ⚡ Ready to Use the Tool? Follow These 3 Steps
 
 ### Step 1: Make sure you have Python installed
 
