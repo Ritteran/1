@@ -1,14 +1,46 @@
 # 📈 NSE/BSE Stock Market Scraper
 
-A user-friendly tool for extracting circulars, daily reports, announcements, and other data from the National Stock Exchange (NSE) and Bombay Stock Exchange (BSE) websites.
+A complete desktop application for scraping, processing, analyzing, and visualizing stock market data from NSE (National Stock Exchange) and BSE (Bombay Stock Exchange).
 
-**✨ NEW: Easy-to-use Web Interface - No coding required!**
+## ✨ What's New: Full-Featured Desktop Application!
 
-> **📄 Want to see what this tool can do?** Just open `index.html` in your browser for a beautiful interactive guide!
+**🎉 Now with Interactive Data Processing & Visualization!**
+
+This isn't just a scraper anymore - it's a **complete market data application** with:
+- 📥 **Data Scraper**: Download fresh data from NSE/BSE
+- 📂 **Data Loader**: Load and preview any data file
+- ⚙️ **Data Processor**: Filter, search, and transform data
+- 📊 **Visualizations**: Interactive charts and graphs
+- 📈 **Analytics**: Deep insights and trend analysis
+- 💾 **Export**: Save processed data in multiple formats
+
+**🚀 Launch with one click!** No coding required.
+
+> **📄 New to this?** Open `index.html` in your browser for an interactive guide!
+> **📱 Want the full app?** Read the [APPLICATION_GUIDE.md](APPLICATION_GUIDE.md) for complete documentation!
 
 ---
 
-## 🚀 Quick Start (For Non-Technical Users)
+## 🚀 Quick Start
+
+### For the Full Desktop Application (Recommended!)
+
+#### Windows:
+Double-click **`start_app.bat`**
+
+#### Mac/Linux:
+Run **`./start_app.sh`**
+
+Your browser opens with a complete application featuring 5 powerful tabs:
+1. **Scraper** - Download fresh data
+2. **Loader** - Open existing files
+3. **Processor** - Filter and transform
+4. **Visualization** - Interactive charts
+5. **Analytics** - Deep insights
+
+### Alternative: Simple Scraper Only
+
+If you just want to scrape data without the processing features:
 
 ### Option 1: Open the HTML Guide (Easiest!)
 Simply double-click the `index.html` file to open it in your web browser. You'll see:
