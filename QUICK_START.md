@@ -6,6 +6,22 @@ This tool downloads stock market data from NSE and BSE websites automatically. Y
 
 ---
 
+## 🖥️ Want a Desktop Shortcut? (Super Easy!)
+
+**Make it even easier!** Install a desktop shortcut so you can launch the app with one click:
+
+**Windows:**
+- Double-click `install_desktop_shortcut.bat`
+
+**Mac/Linux:**
+- Double-click `install_desktop_shortcut.sh` (or run `./install_desktop_shortcut_mac.sh` on Mac)
+
+**That's it!** Now you'll have an icon on your desktop. Just double-click to launch!
+
+📖 **Detailed guide**: See [DESKTOP_INSTALL.md](DESKTOP_INSTALL.md)
+
+---
+
 ## 📄 First Time Here? Start with the HTML Guide!
 
 **Easiest way to get started:**

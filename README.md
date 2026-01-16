@@ -38,6 +38,31 @@ Your browser opens with a complete application featuring 5 powerful tabs:
 4. **Visualization** - Interactive charts
 5. **Analytics** - Deep insights
 
+### 🖥️ Want a Desktop Shortcut? (Optional but Recommended!)
+
+Make the app accessible from your desktop with one click:
+
+**Windows:**
+```
+Double-click: install_desktop_shortcut.bat
+```
+
+**Linux:**
+```bash
+./install_desktop_shortcut.sh
+```
+
+**Mac:**
+```bash
+./install_desktop_shortcut_mac.sh
+```
+
+After installation, find **"NSE-BSE Market App"** on your desktop and double-click to launch!
+
+📖 **Full instructions**: See [DESKTOP_INSTALL.md](DESKTOP_INSTALL.md)
+
+---
+
 ### Alternative: Simple Scraper Only
 
 If you just want to scrape data without the processing features:
