@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE/BSE App - UI Preview & Redesign</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .preview-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .preview-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .preview-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .preview-header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .ui-navigation {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .ui-nav-btn {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .ui-nav-btn:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .ui-nav-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .ui-screen {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .ui-screen.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-bottom: 4px solid #5568d3;
+        }
+
+        .screen-header h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .screen-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .screen-content {
+            padding: 30px;
+        }
+
+        .sidebar-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+            min-height: 600px;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .sidebar h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-label:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .checkbox-label input {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .main-content {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .metric-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 1.2rem;
+            border: 2px dashed #dee2e6;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .tabs-container {
+            display: flex;
+            gap: 5px;
+            border-bottom: 2px solid #e9ecef;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #dee2e6;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: white;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .feature-description {
+            color: #6c757d;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <div class="preview-header">
+            <h1>📊 NSE/BSE Market Data Application</h1>
+            <p>UI Preview & Design System</p>
+        </div>
+
+        <div class="ui-navigation">
+            <button class="ui-nav-btn active" onclick="showScreen('scraper')">📥 Scraper</button>
+            <button class="ui-nav-btn" onclick="showScreen('loader')">📂 Data Loader</button>
+            <button class="ui-nav-btn" onclick="showScreen('processor')">⚙️ Processor</button>
+            <button class="ui-nav-btn" onclick="showScreen('visualization')">📊 Visualization</button>
+            <button class="ui-nav-btn" onclick="showScreen('analytics')">📈 Analytics</button>
+            <button class="ui-nav-btn" onclick="showScreen('dashboard')">🎯 Dashboard</button>
+        </div>
+
+        <!-- Scraper Screen -->
+        <div class="ui-screen active" id="scraper">
+            <div class="screen-header">
+                <h2>📥 Data Scraper</h2>
+                <p>Download fresh data from NSE and BSE websites</p>
+            </div>
+            <div class="screen-content">
+                <div class="sidebar-layout">
+                    <div class="sidebar">
+                        <h3>⚙️ Scraper Settings</h3>
+
+                        <div class="form-group">
+                            <label>Exchange</label>
+                            <select class="form-control">
+                                <option>Both NSE & BSE</option>
+                                <option>NSE Only</option>
+                                <option>BSE Only</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Days of Data: <span style="color: #667eea; font-weight: bold;">7</span></label>
+                            <input type="range" class="form-control" min="1" max="90" value="7">
+                        </div>
+
+                        <div class="form-group">
+                            <label>NSE Data Types</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked>
+                                    <span>📄 Circulars & Announcements</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked>
+                                    <span>📊 Daily Market Reports</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox">
+                                    <span>📢 Latest Announcements</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox">
+                                    <span>📈 Bhavcopy</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>BSE Data Types</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" checked>
+                                    <span>📄 Circulars</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox">
+                                    <span>🎯 Corporate Actions</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox">
+                                    <span>📰 News Updates</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button class="btn-primary">🚀 Start Scraping</button>
+                    </div>
+
+                    <div class="main-content">
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">📊 Scraping Status</h3>
+
+                        <div class="alert alert-info">
+                            <strong>ℹ️ Ready to scrape!</strong> Configure your settings and click "Start Scraping"
+                        </div>
+
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Total Records</div>
+                                <div class="metric-value">2,547</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">NSE Circulars</div>
+                                <div class="metric-value">1,234</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">BSE Reports</div>
+                                <div class="metric-value">1,313</div>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                            <h4 style="margin-bottom: 15px;">Recent Scraping Activity</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Exchange</th>
+                                        <th>Type</th>
+                                        <th>Records</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2024-01-15 14:23</td>
+                                        <td>NSE</td>
+                                        <td>Circulars</td>
+                                        <td>456</td>
+                                        <td><span class="status-badge status-success">✓ Success</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15 14:20</td>
+                                        <td>BSE</td>
+                                        <td>Reports</td>
+                                        <td>789</td>
+                                        <td><span class="status-badge status-success">✓ Success</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14 09:15</td>
+                                        <td>Both</td>
+                                        <td>All Data</td>
+                                        <td>2,103</td>
+                                        <td><span class="status-badge status-success">✓ Success</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Loader Screen -->
+        <div class="ui-screen" id="loader">
+            <div class="screen-header">
+                <h2>📂 Data Loader</h2>
+                <p>Load and preview your data files</p>
+            </div>
+            <div class="screen-content">
+                <div class="sidebar-layout">
+                    <div class="sidebar">
+                        <h3>📁 Available Files</h3>
+
+                        <div class="form-group">
+                            <label>Select File</label>
+                            <select class="form-control">
+                                <option>nse_circulars.json (245 KB)</option>
+                                <option>bse_reports.csv (512 KB)</option>
+                                <option>nse_announcements.json (189 KB)</option>
+                                <option>bse_corporate_actions.csv (367 KB)</option>
+                            </select>
+                        </div>
+
+                        <button class="btn-primary">📖 Load Selected File</button>
+
+                        <hr style="margin: 25px 0; border: none; border-top: 2px solid #e9ecef;">
+
+                        <h3 style="margin-bottom: 20px;">📤 Upload File</h3>
+
+                        <div class="file-upload-area">
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📁</div>
+                            <div style="font-weight: 600; margin-bottom: 5px;">Drop file here or click to browse</div>
+                            <div style="color: #6c757d; font-size: 0.9rem;">Supports JSON, CSV, Excel</div>
+                        </div>
+                    </div>
+
+                    <div class="main-content">
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">📊 Data Preview</h3>
+
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Total Records</div>
+                                <div class="metric-value">1,234</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Columns</div>
+                                <div class="metric-value">8</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">File Size</div>
+                                <div class="metric-value">245 KB</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Date Range</div>
+                                <div class="metric-value" style="font-size: 1.2rem;">7 days</div>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 20px; border-radius: 10px;">
+                            <h4 style="margin-bottom: 15px;">Data Sample (First 10 rows)</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Company</th>
+                                        <th>Symbol</th>
+                                        <th>Subject</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2024-01-15</td>
+                                        <td>Reliance Industries</td>
+                                        <td>RELIANCE</td>
+                                        <td>Board Meeting Announcement</td>
+                                        <td>Corporate Action</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15</td>
+                                        <td>Tata Consultancy</td>
+                                        <td>TCS</td>
+                                        <td>Dividend Declaration</td>
+                                        <td>Dividend</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14</td>
+                                        <td>HDFC Bank</td>
+                                        <td>HDFCBANK</td>
+                                        <td>Quarterly Results</td>
+                                        <td>Financial Results</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14</td>
+                                        <td>Infosys Ltd</td>
+                                        <td>INFY</td>
+                                        <td>Share Buyback</td>
+                                        <td>Corporate Action</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-13</td>
+                                        <td>ITC Limited</td>
+                                        <td>ITC</td>
+                                        <td>AGM Notice</td>
+                                        <td>Meetings</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processor Screen -->
+        <div class="ui-screen" id="processor">
+            <div class="screen-header">
+                <h2>⚙️ Data Processor</h2>
+                <p>Filter, search, and transform your data</p>
+            </div>
+            <div class="screen-content">
+                <div class="sidebar-layout">
+                    <div class="sidebar">
+                        <h3>🔧 Processing Options</h3>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" checked>
+                                <span>🧹 Clean Data (Remove duplicates)</span>
+                            </label>
+                        </div>
+
+                        <h4 style="margin-top: 25px; margin-bottom: 15px; color: #667eea;">📅 Date Filter</h4>
+
+                        <div class="form-group">
+                            <label>Date Column</label>
+                            <select class="form-control">
+                                <option>date</option>
+                                <option>ex_date</option>
+                                <option>record_date</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" class="form-control" value="2024-01-01">
+                        </div>
+
+                        <div class="form-group">
+                            <label>End Date</label>
+                            <input type="date" class="form-control" value="2024-01-15">
+                        </div>
+
+                        <h4 style="margin-top: 25px; margin-bottom: 15px; color: #667eea;">🔍 Keyword Filter</h4>
+
+                        <div class="form-group">
+                            <label>Search Column</label>
+                            <select class="form-control">
+                                <option>All columns</option>
+                                <option>subject</option>
+                                <option>company</option>
+                                <option>category</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Keywords (comma-separated)</label>
+                            <input type="text" class="form-control" placeholder="dividend, bonus, split">
+                        </div>
+
+                        <h4 style="margin-top: 25px; margin-bottom: 15px; color: #667eea;">🏢 Company Filter</h4>
+
+                        <div class="form-group">
+                            <label>Companies (comma-separated)</label>
+                            <input type="text" class="form-control" placeholder="RELIANCE, TCS, INFY">
+                        </div>
+
+                        <button class="btn-primary">✨ Apply Filters</button>
+                    </div>
+
+                    <div class="main-content">
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">📊 Processed Results</h3>
+
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Original Records</div>
+                                <div class="metric-value">1,234</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Filtered Records</div>
+                                <div class="metric-value">456</div>
+                            </div>
+                            <div class="metric-card" style="border-left-color: #dc3545;">
+                                <div class="metric-label">Removed</div>
+                                <div class="metric-value" style="color: #dc3545;">778</div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success" style="margin-bottom: 20px;">
+                            <strong>✓ Filters Applied Successfully!</strong> Showing 456 records after filtering
+                        </div>
+
+                        <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <h4 style="margin-bottom: 15px;">Filtered Data</h4>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Company</th>
+                                        <th>Subject</th>
+                                        <th>Category</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>2024-01-15</td>
+                                        <td>Reliance Industries</td>
+                                        <td>Dividend Declaration - Rs 9 per share</td>
+                                        <td>Dividend</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-15</td>
+                                        <td>TCS</td>
+                                        <td>Interim Dividend Announcement</td>
+                                        <td>Dividend</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2024-01-14</td>
+                                        <td>Infosys</td>
+                                        <td>Final Dividend - Rs 16.50 per share</td>
+                                        <td>Dividend</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display: flex; gap: 15px;">
+                            <button class="btn-secondary" style="flex: 1;">📥 Download CSV</button>
+                            <button class="btn-secondary" style="flex: 1;">📥 Download JSON</button>
+                            <button class="btn-secondary" style="flex: 1;">📥 Download Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visualization Screen -->
+        <div class="ui-screen" id="visualization">
+            <div class="screen-header">
+                <h2>📊 Data Visualization</h2>
+                <p>Interactive charts and insights</p>
+            </div>
+            <div class="screen-content">
+                <div class="tabs-container">
+                    <button class="tab-btn active">📈 Time Series</button>
+                    <button class="tab-btn">📊 Bar Chart</button>
+                    <button class="tab-btn">🥧 Pie Chart</button>
+                    <button class="tab-btn">📉 Trends</button>
+                    <button class="tab-btn">🔥 Heatmap</button>
+                </div>
+
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 20px;">Activity Over Time</h3>
+                    <div class="chart-placeholder">
+                        <div>
+                            <div style="font-size: 3rem; margin-bottom: 10px;">📈</div>
+                            <div>Interactive Time Series Chart</div>
+                            <div style="font-size: 0.9rem; color: #adb5bd; margin-top: 5px;">
+                                Line chart showing activity trends over the selected period
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Peak Activity Day</div>
+                        <div class="metric-value" style="font-size: 1.5rem;">Jan 15</div>
+                        <div style="color: #28a745; margin-top: 5px;">↑ 234 records</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Average per Day</div>
+                        <div class="metric-value" style="font-size: 1.5rem;">156</div>
+                        <div style="color: #6c757d; margin-top: 5px;">Last 7 days</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Overall Trend</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #28a745;">↗ Growing</div>
+                        <div style="color: #28a745; margin-top: 5px;">+23% increase</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Total Data Points</div>
+                        <div class="metric-value">1,234</div>
+                        <div style="color: #6c757d; margin-top: 5px;">8 days range</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="chart-container">
+                        <h4 style="margin-bottom: 15px;">Category Distribution</h4>
+                        <div class="chart-placeholder" style="height: 250px;">
+                            <div>
+                                <div style="font-size: 2.5rem; margin-bottom: 10px;">🥧</div>
+                                <div>Pie Chart</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h4 style="margin-bottom: 15px;">Top Companies</h4>
+                        <div class="chart-placeholder" style="height: 250px;">
+                            <div>
+                                <div style="font-size: 2.5rem; margin-bottom: 10px;">📊</div>
+                                <div>Bar Chart</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Screen -->
+        <div class="ui-screen" id="analytics">
+            <div class="screen-header">
+                <h2>📈 Advanced Analytics</h2>
+                <p>Deep insights and data quality analysis</p>
+            </div>
+            <div class="screen-content">
+                <div class="search-box">
+                    <input type="text" placeholder="Search across all columns...">
+                </div>
+
+                <h3 style="margin-bottom: 20px;">📊 Summary Statistics</h3>
+
+                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                    <div class="metric-card">
+                        <div class="metric-label">Total Records</div>
+                        <div class="metric-value">1,234</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Unique Companies</div>
+                        <div class="metric-value">89</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Categories</div>
+                        <div class="metric-value">12</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Date Range</div>
+                        <div class="metric-value" style="font-size: 1.3rem;">8 days</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Data Quality</div>
+                        <div class="metric-value" style="font-size: 1.5rem; color: #28a745;">98%</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px;">
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 20px; color: #2c3e50;">📋 Top Categories</h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Dividend</span>
+                                    <span style="font-weight: 600; color: #667eea;">456 (37%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 37%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Corporate Action</span>
+                                    <span style="font-weight: 600; color: #667eea;">312 (25%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 25%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Financial Results</span>
+                                    <span style="font-weight: 600; color: #667eea;">234 (19%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 19%;"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                    <span>Board Meetings</span>
+                                    <span style="font-weight: 600; color: #667eea;">156 (13%)</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 13%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                        <h4 style="margin-bottom: 20px; color: #2c3e50;">✅ Data Quality Report</h4>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Complete Records</span>
+                                <span class="status-badge status-success">98.5%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Missing Values</span>
+                                <span class="status-badge status-warning">23 (1.9%)</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Duplicate Records</span>
+                                <span class="status-badge status-success">0</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Data Freshness</span>
+                                <span class="status-badge status-success">Today</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-top: 20px;">
+                    <h4 style="margin-bottom: 15px;">🔍 Advanced Search Results</h4>
+                    <div class="alert alert-info">
+                        Enter a search term above to find records across all fields
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Screen -->
+        <div class="ui-screen" id="dashboard">
+            <div class="screen-header">
+                <h2>🎯 Dashboard Overview</h2>
+                <p>Complete application overview and quick actions</p>
+            </div>
+            <div class="screen-content">
+                <div class="alert alert-success">
+                    <strong>🎉 Welcome to NSE/BSE Market Data Application!</strong> Your one-stop solution for market data analysis
+                </div>
+
+                <h3 style="margin-bottom: 20px;">🚀 Quick Actions</h3>
+
+                <div class="card-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📥</div>
+                        <div class="feature-title">Scrape Data</div>
+                        <div class="feature-description">Download fresh circulars and reports from NSE/BSE</div>
+                        <button class="btn-secondary" style="width: 100%; margin-top: 15px;">Start Scraping →</button>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📂</div>
+                        <div class="feature-title">Load Data</div>
+                        <div class="feature-description">Import and preview existing data files</div>
+                        <button class="btn-secondary" style="width: 100%; margin-top: 15px;">Load Files →</button>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">⚙️</div>
+                        <div class="feature-title">Process Data</div>
+                        <div class="feature-description">Filter, clean, and transform your datasets</div>
+                        <button class="btn-secondary" style="width: 100%; margin-top: 15px;">Open Processor →</button>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Visualize</div>
+                        <div class="feature-description">Create interactive charts and graphs</div>
+                        <button class="btn-secondary" style="width: 100%; margin-top: 15px;">View Charts →</button>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">📈</div>
+                        <div class="feature-title">Analytics</div>
+                        <div class="feature-description">Deep insights and trend analysis</div>
+                        <button class="btn-secondary" style="width: 100%; margin-top: 15px;">Analyze Data →</button>
+                    </div>
+
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <div class="feature-title">Export</div>
+                        <div class="feature-description">Download in CSV, JSON, or Excel format</div>
+                        <button class="btn-secondary" style="width: 100%; margin-top: 15px;">Export Data →</button>
+                    </div>
+                </div>
+
+                <h3 style="margin: 40px 0 20px;">📊 Recent Activity</h3>
+
+                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Action</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-01-15 14:30</td>
+                                <td>Data Scraped</td>
+                                <td>NSE Circulars (456 records)</td>
+                                <td><span class="status-badge status-success">✓ Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:25</td>
+                                <td>Data Processed</td>
+                                <td>Filtered by keywords</td>
+                                <td><span class="status-badge status-success">✓ Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:20</td>
+                                <td>File Loaded</td>
+                                <td>bse_reports.csv</td>
+                                <td><span class="status-badge status-success">✓ Success</span></td>
+                            </tr>
+                            <tr>
+                                <td>2024-01-15 14:15</td>
+                                <td>Chart Created</td>
+                                <td>Time Series Visualization</td>
+                                <td><span class="status-badge status-success">✓ Success</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 30px; padding: 25px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                    <h3 style="margin-bottom: 15px; color: white;">💡 Pro Tips</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            ✨ Use the Data Processor to filter data before visualizing for better performance
+                        </li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            📊 Export your processed data to avoid re-scraping
+                        </li>
+                        <li style="padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">
+                            🔍 Use keyword filters to find specific corporate actions
+                        </li>
+                        <li style="padding: 10px 0;">
+                            💾 Save your filtered results in multiple formats for different uses
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.ui-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.ui-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
