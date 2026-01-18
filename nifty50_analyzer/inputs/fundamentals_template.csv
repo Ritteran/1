@@ -1,0 +1,14 @@
+Company,Sector,ROE,EBITDA_Margin,ROCE,Debt_to_Equity,Revenue_Growth,NIM,GNPA,PCR,Cost_to_Income,EBIT_Margin,FCF_Margin,Inventory_Turnover,Asset_Turnover,Current_Ratio,Working_Capital_Days,Revenue_per_User
+RELIANCE,Energy,12.5,15.8,14.2,0.85,8.5,,,,,,,,,,
+TCS,IT,35.2,,,,15.2,,,,,22.5,18.5,,,,
+HDFCBANK,Banking,16.5,,,0.25,,3.2,2.1,72.0,42.0,,,,,,
+INFY,IT,28.5,,,,12.8,,,,,25.0,16.0,,,,
+ICICIBANK,Banking,15.2,,,0.35,,3.5,2.5,68.0,45.0,,,,,,
+HINDUNILVR,FMCG,,25.5,38.0,0.15,6.5,,,,,,10.5,,,
+ITC,FMCG,,22.0,32.0,0.20,8.0,,,,,,12.0,,,
+SBIN,Banking,14.0,,,0.50,,2.8,3.2,70.0,48.0,,,,,,
+BHARTIARTL,Telecom,,,8.5,1.80,,,,,,,,,,,,150.0
+KOTAKBANK,Banking,16.8,,,0.28,,3.0,1.8,75.0,40.0,,,,,,
+# Add fundamentals for all NIFTY 50 companies
+# Leave cells blank if ratio doesn't apply to that sector
+# All percentage values should be in % format (e.g., 15.5 means 15.5%)
