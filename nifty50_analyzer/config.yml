@@ -1,0 +1,137 @@
+# NIFTY 50 Stock Analyzer Configuration
+
+# Analysis Parameters
+analysis:
+  date_range: "1y"  # 1 year of historical data
+  trading_days: 252  # Number of trading days per year
+
+# Calculation Settings
+calculations:
+  # Use logarithmic returns for calculations
+  use_log_returns: true
+
+  # Annualization factors
+  daily_to_annual_return: 252  # Multiply mean daily return by this
+  daily_to_annual_volatility: 15.87  # sqrt(252) for volatility
+
+  # Risk-free rate for Sharpe ratio (%)
+  risk_free_rate: 6.5  # Current India Government Bond yield
+
+# Scoring Weights (must sum to 1.0)
+weights:
+  financial_strength: 0.40  # Balance sheet quality, profitability
+  growth_efficiency: 0.30   # Growth rates, efficiency metrics
+  risk_adjusted_return: 0.30  # Expected return vs volatility
+
+# Signal Generation Thresholds
+signals:
+  # Percentile thresholds within sector
+  buy_threshold: 80  # Top 20% of sector
+  avoid_threshold: 20  # Bottom 20% of sector
+
+  # Risk flags (if any triggered, downgrade signal)
+  max_volatility_percentile: 85  # Flag if volatility in top 15%
+  max_debt_to_equity: 2.0  # Flag if D/E > 2.0
+  min_roe: 5.0  # Flag if ROE < 5%
+  max_gnpa: 5.0  # For banks, flag if GNPA > 5%
+
+# Input Files
+inputs:
+  prices_file: "inputs/prices.csv"
+  fundamentals_file: "inputs/fundamentals.csv"
+  sector_mapping_file: "inputs/sector_mapping.csv"
+  benchmarks_file: "sector_benchmarks.yml"
+
+# Output Files
+outputs:
+  summary_csv: "outputs/summary.csv"
+  detailed_csv: "outputs/detailed_analysis.csv"
+  flags_csv: "outputs/risk_flags.csv"
+  report_html: "outputs/report.html"
+  charts_folder: "outputs/charts/"
+
+# Data Quality Rules
+data_quality:
+  # Stop analysis if these conditions are not met
+  require_price_data: true  # Must have price data for all stocks
+  require_fundamentals: true  # Must have fundamental data
+  require_sector_mapping: true  # Must know sector for each stock
+
+  # Minimum data completeness (%)
+  min_price_data_completeness: 90  # At least 90% of trading days
+  min_fundamental_completeness: 80  # At least 80% of ratios
+
+  # How to handle missing data
+  allow_interpolation: false  # Never interpolate missing values
+  allow_forward_fill: false  # Never forward fill
+  allow_backward_fill: false  # Never backward fill
+
+  # Warning thresholds
+  warn_if_missing_days: 20  # Warn if more than 20 days missing
+  warn_if_missing_ratios: 2  # Warn if more than 2 ratios missing
+
+# Reporting Options
+reporting:
+  # Include these in HTML report
+  include_charts: true
+  include_sector_comparison: true
+  include_risk_matrix: true
+  include_top_picks: true
+  top_picks_count: 10
+
+  # Chart settings
+  chart_style: "plotly"  # or "matplotlib"
+  color_scheme: "professional"  # professional, colorful, minimal
+
+# NIFTY 50 Companies (for validation)
+nifty50_companies:
+  - "RELIANCE"
+  - "TCS"
+  - "HDFCBANK"
+  - "INFY"
+  - "ICICIBANK"
+  - "HINDUNILVR"
+  - "ITC"
+  - "SBIN"
+  - "BHARTIARTL"
+  - "KOTAKBANK"
+  - "LT"
+  - "AXISBANK"
+  - "ASIANPAINT"
+  - "MARUTI"
+  - "HCLTECH"
+  - "SUNPHARMA"
+  - "BAJFINANCE"
+  - "TITAN"
+  - "ULTRACEMCO"
+  - "NESTLEIND"
+  - "WIPRO"
+  - "ONGC"
+  - "NTPC"
+  - "POWERGRID"
+  - "M&M"
+  - "TATAMOTORS"
+  - "TATASTEEL"
+  - "TECHM"
+  - "ADANIENT"
+  - "ADANIPORTS"
+  - "BAJAJFINSV"
+  - "COALINDIA"
+  - "DIVISLAB"
+  - "DRREDDY"
+  - "EICHERMOT"
+  - "GRASIM"
+  - "HDFCLIFE"
+  - "HEROMOTOCO"
+  - "HINDALCO"
+  - "HINDPETRO"
+  - "INDUSINDBK"
+  - "JSWSTEEL"
+  - "BRITANNIA"
+  - "CIPLA"
+  - "APOLLOHOSP"
+  - "BAJAJ-AUTO"
+  - "BPCL"
+  - "SBILIFE"
+  - "TATACONSUM"
+  - "UPL"

@@ -1,0 +1,288 @@
+# Sector Benchmark Configuration for NIFTY 50 Analysis
+# These are ideal ranges for financial ratios by sector
+
+Banking:
+  description: "Banks and Financial Services"
+  ratios:
+    ROE:
+      min: 12.0
+      max: 18.0
+      higher_is_better: true
+      weight: 0.25
+      description: "Return on Equity (%)"
+
+    NIM:
+      min: 2.5
+      max: 4.0
+      higher_is_better: true
+      weight: 0.20
+      description: "Net Interest Margin (%)"
+
+    GNPA:
+      min: 0.0
+      max: 3.0
+      higher_is_better: false
+      weight: 0.25
+      description: "Gross NPA Ratio (%)"
+
+    PCR:
+      min: 70.0
+      max: 100.0
+      higher_is_better: true
+      weight: 0.15
+      description: "Provision Coverage Ratio (%)"
+
+    Cost_to_Income:
+      min: 35.0
+      max: 50.0
+      higher_is_better: false
+      weight: 0.15
+      description: "Cost to Income Ratio (%)"
+
+IT:
+  description: "Information Technology"
+  ratios:
+    EBIT_Margin:
+      min: 18.0
+      max: 28.0
+      higher_is_better: true
+      weight: 0.30
+      description: "EBIT Margin (%)"
+
+    Revenue_Growth:
+      min: 10.0
+      max: 25.0
+      higher_is_better: true
+      weight: 0.25
+      description: "YoY Revenue Growth (%)"
+
+    FCF_Margin:
+      min: 12.0
+      max: 20.0
+      higher_is_better: true
+      weight: 0.25
+      description: "Free Cash Flow Margin (%)"
+
+    ROE:
+      min: 20.0
+      max: 35.0
+      higher_is_better: true
+      weight: 0.20
+      description: "Return on Equity (%)"
+
+FMCG:
+  description: "Fast Moving Consumer Goods"
+  ratios:
+    EBITDA_Margin:
+      min: 18.0
+      max: 25.0
+      higher_is_better: true
+      weight: 0.30
+      description: "EBITDA Margin (%)"
+
+    ROCE:
+      min: 25.0
+      max: 40.0
+      higher_is_better: true
+      weight: 0.30
+      description: "Return on Capital Employed (%)"
+
+    Inventory_Turnover:
+      min: 8.0
+      max: 15.0
+      higher_is_better: true
+      weight: 0.20
+      description: "Inventory Turnover Ratio"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 0.5
+      higher_is_better: false
+      weight: 0.20
+      description: "Debt to Equity Ratio"
+
+Metals:
+  description: "Metals and Mining"
+  ratios:
+    ROCE:
+      min: 12.0
+      max: 20.0
+      higher_is_better: true
+      weight: 0.30
+      description: "Return on Capital Employed (%)"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 1.0
+      higher_is_better: false
+      weight: 0.25
+      description: "Debt to Equity Ratio"
+
+    EBITDA_Margin:
+      min: 15.0
+      max: 25.0
+      higher_is_better: true
+      weight: 0.25
+      description: "EBITDA Margin (%)"
+
+    Asset_Turnover:
+      min: 0.8
+      max: 1.5
+      higher_is_better: true
+      weight: 0.20
+      description: "Asset Turnover Ratio"
+
+Energy:
+  description: "Oil, Gas and Energy"
+  ratios:
+    EBITDA_Margin:
+      min: 8.0
+      max: 15.0
+      higher_is_better: true
+      weight: 0.30
+      description: "EBITDA Margin (%)"
+
+    ROCE:
+      min: 8.0
+      max: 15.0
+      higher_is_better: true
+      weight: 0.25
+      description: "Return on Capital Employed (%)"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 1.5
+      higher_is_better: false
+      weight: 0.25
+      description: "Debt to Equity Ratio"
+
+    Current_Ratio:
+      min: 1.0
+      max: 2.0
+      higher_is_better: true
+      weight: 0.20
+      description: "Current Ratio"
+
+Pharma:
+  description: "Pharmaceuticals"
+  ratios:
+    EBITDA_Margin:
+      min: 20.0
+      max: 30.0
+      higher_is_better: true
+      weight: 0.30
+      description: "EBITDA Margin (%)"
+
+    ROE:
+      min: 15.0
+      max: 25.0
+      higher_is_better: true
+      weight: 0.25
+      description: "Return on Equity (%)"
+
+    Revenue_Growth:
+      min: 8.0
+      max: 18.0
+      higher_is_better: true
+      weight: 0.25
+      description: "YoY Revenue Growth (%)"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 0.6
+      higher_is_better: false
+      weight: 0.20
+      description: "Debt to Equity Ratio"
+
+Auto:
+  description: "Automobile and Components"
+  ratios:
+    EBITDA_Margin:
+      min: 10.0
+      max: 16.0
+      higher_is_better: true
+      weight: 0.30
+      description: "EBITDA Margin (%)"
+
+    ROCE:
+      min: 15.0
+      max: 25.0
+      higher_is_better: true
+      weight: 0.25
+      description: "Return on Capital Employed (%)"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 0.8
+      higher_is_better: false
+      weight: 0.25
+      description: "Debt to Equity Ratio"
+
+    Working_Capital_Days:
+      min: 30.0
+      max: 60.0
+      higher_is_better: false
+      weight: 0.20
+      description: "Working Capital Days"
+
+Telecom:
+  description: "Telecommunications"
+  ratios:
+    EBITDA_Margin:
+      min: 35.0
+      max: 45.0
+      higher_is_better: true
+      weight: 0.30
+      description: "EBITDA Margin (%)"
+
+    ROCE:
+      min: 5.0
+      max: 12.0
+      higher_is_better: true
+      weight: 0.25
+      description: "Return on Capital Employed (%)"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 2.0
+      higher_is_better: false
+      weight: 0.25
+      description: "Debt to Equity Ratio"
+
+    Revenue_per_User:
+      min: 100.0
+      max: 200.0
+      higher_is_better: true
+      weight: 0.20
+      description: "ARPU - Revenue per User"
+
+Diversified:
+  description: "Diversified Conglomerates"
+  ratios:
+    ROCE:
+      min: 12.0
+      max: 18.0
+      higher_is_better: true
+      weight: 0.30
+      description: "Return on Capital Employed (%)"
+
+    EBITDA_Margin:
+      min: 12.0
+      max: 20.0
+      higher_is_better: true
+      weight: 0.25
+      description: "EBITDA Margin (%)"
+
+    Debt_to_Equity:
+      min: 0.0
+      max: 1.0
+      higher_is_better: false
+      weight: 0.25
+      description: "Debt to Equity Ratio"
+
+    ROE:
+      min: 12.0
+      max: 20.0
+      higher_is_better: true
+      weight: 0.20
+      description: "Return on Equity (%)"
