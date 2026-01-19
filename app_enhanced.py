@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
 import os
+import sys
 from pathlib import Path
 from io import BytesIO
 
@@ -19,6 +20,19 @@ from nse_scraper import NSEScraper
 from bse_scraper import BSEScraper
 from data_processor import DataProcessor
 import config
+
+# Import NIFTY 50 analyzer modules
+sys.path.append(str(Path(__file__).parent / 'nifty50_analyzer' / 'src'))
+try:
+    from nifty50_analyzer.src.returns_risk import ReturnsRiskCalculator, load_price_data
+    from nifty50_analyzer.src.scoring import RatioScorer
+    from nifty50_analyzer.src.signal import SignalGenerator
+    from nifty50_analyzer.src.reporting import ReportGenerator
+    import yaml
+    NIFTY50_AVAILABLE = True
+except ImportError as e:
+    NIFTY50_AVAILABLE = False
+    print(f"NIFTY 50 Analyzer not available: {e}")
 
 # Page configuration
 st.set_page_config(
@@ -61,6 +75,10 @@ if 'loaded_data' not in st.session_state:
     st.session_state.loaded_data = None
 if 'processed_data' not in st.session_state:
     st.session_state.processed_data = None
+if 'nifty50_results' not in st.session_state:
+    st.session_state.nifty50_results = None
+if 'nifty50_summary' not in st.session_state:
+    st.session_state.nifty50_summary = None
 
 # Initialize processor
 processor = DataProcessor()
@@ -674,6 +692,324 @@ def analytics_tab():
         st.dataframe(result, use_container_width=True)
 
 
+def nifty50_analyzer_tab():
+    """NIFTY 50 Stock Analyzer Tab"""
+    st.header("🎯 NIFTY 50 Stock Analyzer")
+    st.write("Analyze all 50 NIFTY stocks with sector-specific benchmarks and risk-adjusted returns")
+
+    if not NIFTY50_AVAILABLE:
+        st.error("❌ NIFTY 50 Analyzer modules not available. Please check installation.")
+        return
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        st.subheader("📁 Data Input")
+
+        # File upload option
+        input_method = st.radio(
+            "Input Method:",
+            ["📤 Upload Files", "📂 Use Template Files"]
+        )
+
+        if input_method == "📤 Upload Files":
+            st.write("**Upload your data files:**")
+
+            price_file = st.file_uploader(
+                "1. Price Data (CSV with 1 year daily prices)",
+                type=['csv'],
+                key='price_upload'
+            )
+
+            fundamentals_file = st.file_uploader(
+                "2. Fundamentals Data (CSV with financial ratios)",
+                type=['csv'],
+                key='fundamentals_upload'
+            )
+
+            # Sector mapping is provided
+            st.info("💡 Sector mapping is pre-configured (no upload needed)")
+
+        else:
+            st.info("📋 Using template files from nifty50_analyzer/inputs/")
+            st.write("Make sure you've filled in:")
+            st.write("- ✅ prices.csv")
+            st.write("- ✅ fundamentals.csv")
+            price_file = None
+            fundamentals_file = None
+
+        st.divider()
+        st.subheader("⚙️ Configuration")
+
+        # Risk-free rate
+        risk_free_rate = st.number_input(
+            "Risk-Free Rate (%):",
+            min_value=0.0,
+            max_value=20.0,
+            value=6.5,
+            step=0.5,
+            help="Usually government bond yield (10Y)"
+        ) / 100
+
+        # Signal thresholds
+        st.write("**Signal Thresholds:**")
+        buy_threshold = st.slider(
+            "BUY Threshold (Percentile):",
+            60, 95, 80,
+            help="Top X% = BUY signal"
+        )
+        avoid_threshold = st.slider(
+            "AVOID Threshold (Percentile):",
+            5, 40, 20,
+            help="Bottom X% = AVOID signal"
+        )
+
+        # Composite weights
+        st.write("**Composite Score Weights:**")
+        weight_financial = st.slider("Financial Strength:", 0, 100, 40, 5) / 100
+        weight_growth = st.slider("Growth & Efficiency:", 0, 100, 30, 5) / 100
+        weight_risk = st.slider("Risk-Adjusted Return:", 0, 100, 30, 5) / 100
+
+        # Normalize weights
+        total_weight = weight_financial + weight_growth + weight_risk
+        if total_weight != 1.0:
+            st.warning(f"⚠️ Weights sum to {total_weight*100:.0f}% (will be normalized to 100%)")
+            weight_financial /= total_weight
+            weight_growth /= total_weight
+            weight_risk /= total_weight
+
+        st.divider()
+
+        # Run analysis button
+        run_analysis = st.button(
+            "🚀 Run Analysis",
+            type="primary",
+            use_container_width=True
+        )
+
+    with col2:
+        st.subheader("📊 Analysis Results")
+
+        if run_analysis:
+            try:
+                # Load configuration
+                config_path = Path(__file__).parent / 'nifty50_analyzer' / 'config.yml'
+                benchmarks_path = Path(__file__).parent / 'nifty50_analyzer' / 'sector_benchmarks.yml'
+
+                with open(config_path, 'r') as f:
+                    config_data = yaml.safe_load(f)
+
+                with open(benchmarks_path, 'r') as f:
+                    benchmarks = yaml.safe_load(f)
+
+                # Update config with user settings
+                config_data['risk_free_rate'] = risk_free_rate
+                config_data['signals']['buy_threshold'] = buy_threshold
+                config_data['signals']['avoid_threshold'] = avoid_threshold
+                config_data['weights']['financial_strength'] = weight_financial
+                config_data['weights']['growth_efficiency'] = weight_growth
+                config_data['weights']['risk_adjusted_return'] = weight_risk
+
+                # Load data
+                with st.spinner("📂 Loading data..."):
+                    if input_method == "📤 Upload Files":
+                        if not price_file or not fundamentals_file:
+                            st.error("❌ Please upload both price and fundamentals files")
+                            return
+
+                        prices_df = pd.read_csv(price_file, index_col=0, parse_dates=True)
+                        fundamentals_df = pd.read_csv(fundamentals_file)
+                    else:
+                        inputs_dir = Path(__file__).parent / 'nifty50_analyzer' / 'inputs'
+                        prices_df = pd.read_csv(inputs_dir / 'prices.csv', index_col=0, parse_dates=True)
+                        fundamentals_df = pd.read_csv(inputs_dir / 'fundamentals.csv')
+
+                    sector_mapping_df = pd.read_csv(
+                        Path(__file__).parent / 'nifty50_analyzer' / 'inputs' / 'sector_mapping.csv'
+                    )
+
+                # Initialize modules
+                with st.spinner("🔧 Initializing analyzer..."):
+                    returns_calculator = ReturnsRiskCalculator(trading_days=252)
+                    scorer = RatioScorer(benchmarks=benchmarks, weights=config_data['weights'])
+                    signal_generator = SignalGenerator(config=config_data['signals'])
+
+                # Calculate returns and risk
+                with st.spinner("📈 Calculating returns & volatility..."):
+                    returns_df = returns_calculator.analyze_portfolio(prices_df, risk_free_rate=risk_free_rate)
+
+                # Score fundamentals
+                with st.spinner("🎯 Scoring fundamentals..."):
+                    fundamentals_with_sector = fundamentals_df.merge(
+                        sector_mapping_df[['Company', 'Sector']],
+                        on='Company',
+                        how='left'
+                    )
+                    scores_df = scorer.score_portfolio(fundamentals_with_sector)
+
+                # Combine analysis
+                with st.spinner("🔄 Combining analysis..."):
+                    returns_df_reset = returns_df.reset_index().rename(columns={'index': 'symbol'})
+                    combined = scores_df.merge(returns_df_reset, left_on='symbol', right_on='symbol', how='inner')
+
+                    # Add sector if not present
+                    if 'sector' not in combined.columns:
+                        sector_map = sector_mapping_df.set_index('Company')['Sector'].to_dict()
+                        combined['sector'] = combined['symbol'].map(sector_map)
+
+                # Generate signals
+                with st.spinner("🚦 Generating signals..."):
+                    signals_df, summary = signal_generator.generate_portfolio_signals(combined)
+                    summary = signal_generator.generate_summary_stats(signals_df)
+
+                # Store results
+                st.session_state.nifty50_results = signals_df
+                st.session_state.nifty50_summary = summary
+
+                st.success("✅ Analysis complete!")
+
+            except Exception as e:
+                st.error(f"❌ Analysis failed: {e}")
+                import traceback
+                with st.expander("Show error details"):
+                    st.code(traceback.format_exc())
+                return
+
+        # Display results if available
+        if st.session_state.nifty50_results is not None:
+            signals_df = st.session_state.nifty50_results
+            summary = st.session_state.nifty50_summary
+
+            # Summary statistics
+            st.subheader("📈 Executive Summary")
+
+            col_a, col_b, col_c, col_d = st.columns(4)
+            col_a.metric("🟢 BUY", summary.get('buy_count', 0))
+            col_b.metric("🟡 HOLD", summary.get('hold_count', 0))
+            col_c.metric("🔴 AVOID", summary.get('avoid_count', 0))
+            col_d.metric("⭐ High Conviction", summary.get('high_confidence_buys', 0))
+
+            # Top BUY picks
+            st.divider()
+            st.subheader("⭐ Top BUY Picks")
+
+            buys = signals_df[signals_df['signal'] == 'BUY'].sort_values('composite_score', ascending=False).head(10)
+
+            if len(buys) > 0:
+                for idx, row in buys.iterrows():
+                    with st.expander(f"🟢 **{row.get('symbol', idx)}** - {row.get('sector', 'N/A')} (Score: {row.get('composite_score', 0):.1f})"):
+                        col_x, col_y = st.columns(2)
+
+                        with col_x:
+                            st.write("**Metrics:**")
+                            st.write(f"- Expected Return: {row.get('expected_return_pct', 0):.1f}%")
+                            st.write(f"- Volatility: {row.get('volatility_pct', 0):.1f}%")
+                            st.write(f"- Sharpe Ratio: {row.get('sharpe_ratio', 0):.2f}")
+
+                        with col_y:
+                            st.write("**Scores:**")
+                            st.write(f"- Composite: {row.get('composite_score', 0):.1f}")
+                            st.write(f"- Percentile: {row.get('percentile', 0):.0f}%")
+                            st.write(f"- Confidence: {row.get('confidence', 'N/A')}")
+
+                        st.info(f"💡 {row.get('explanation', 'No explanation available')}")
+            else:
+                st.warning("No BUY signals generated")
+
+            # Complete results table
+            st.divider()
+            st.subheader("📋 Complete Results")
+
+            # Color-coded display
+            def color_signal(val):
+                if val == 'BUY':
+                    return 'background-color: #d4edda; color: #155724'
+                elif val == 'AVOID':
+                    return 'background-color: #f8d7da; color: #721c24'
+                else:
+                    return 'background-color: #fff3cd; color: #856404'
+
+            # Select display columns
+            display_cols = ['symbol', 'sector', 'signal', 'confidence', 'composite_score',
+                          'percentile', 'risk_count', 'expected_return_pct', 'volatility_pct']
+            display_cols = [col for col in display_cols if col in signals_df.columns]
+
+            styled_df = signals_df[display_cols].style.applymap(
+                color_signal,
+                subset=['signal']
+            ).format({
+                'composite_score': '{:.1f}',
+                'percentile': '{:.0f}%',
+                'expected_return_pct': '{:.1f}%',
+                'volatility_pct': '{:.1f}%'
+            })
+
+            st.dataframe(styled_df, use_container_width=True)
+
+            # Download options
+            st.divider()
+            st.subheader("💾 Download Reports")
+
+            col_x, col_y, col_z = st.columns(3)
+
+            with col_x:
+                # Summary CSV
+                summary_df = signals_df[display_cols].copy()
+                csv = summary_df.to_csv(index=False)
+                st.download_button(
+                    label="📥 Summary CSV",
+                    data=csv,
+                    file_name=f"nifty50_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv"
+                )
+
+            with col_y:
+                # Detailed CSV
+                csv_detailed = signals_df.to_csv(index=False)
+                st.download_button(
+                    label="📥 Detailed CSV",
+                    data=csv_detailed,
+                    file_name=f"nifty50_detailed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv"
+                )
+
+            with col_z:
+                # Generate HTML report
+                try:
+                    reporter = ReportGenerator(output_dir='.')
+                    html_content = reporter._build_html_structure(signals_df, summary, config_data)
+
+                    st.download_button(
+                        label="📥 HTML Report",
+                        data=html_content,
+                        file_name=f"nifty50_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html",
+                        mime="text/html"
+                    )
+                except:
+                    st.warning("HTML report generation unavailable")
+
+        else:
+            st.info("👈 Configure settings and click 'Run Analysis' to get started!")
+
+            # Show sample template
+            st.write("### 📋 Sample Data Format")
+
+            with st.expander("Price Data Format"):
+                st.write("**prices.csv** should have:")
+                st.code("""Date,HDFCBANK,RELIANCE,TCS,...
+2024-01-01,1650.50,2450.75,3890.20,...
+2024-01-02,1652.30,2455.10,3895.50,...
+...
+(252 trading days total)""", language="csv")
+
+            with st.expander("Fundamentals Data Format"):
+                st.write("**fundamentals.csv** should have:")
+                st.code("""Company,ROE,Debt_to_Equity,EBITDA_Margin,...
+HDFCBANK,15.2,0.85,45.3,...
+RELIANCE,12.5,0.65,25.8,...
+...""", language="csv")
+
+
 def main():
     """Main application"""
 
@@ -682,12 +1018,13 @@ def main():
                 unsafe_allow_html=True)
 
     # Create tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "📥 Scraper",
         "📂 Data Loader",
         "⚙️ Processor",
         "📊 Visualization",
-        "📈 Analytics"
+        "📈 Analytics",
+        "🎯 NIFTY 50 Analyzer"
     ])
 
     with tab1:
@@ -704,6 +1041,9 @@ def main():
 
     with tab5:
         analytics_tab()
+
+    with tab6:
+        nifty50_analyzer_tab()
 
     # Footer
     st.divider()
