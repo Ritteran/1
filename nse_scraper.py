@@ -488,6 +488,148 @@ class NSEScraper(BaseScraper):
 
         return indices
 
+    def get_symbol_quote(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """
+        Get detailed quote data for a specific symbol
+
+        Args:
+            symbol: Stock symbol (e.g., 'HDFCBANK', 'RELIANCE')
+
+        Returns:
+            Dictionary with detailed quote data or None if not found
+        """
+        self.logger.info(f"Fetching quote for symbol: {symbol}")
+
+        symbol = symbol.upper().strip()
+
+        try:
+            # NSE Quote API endpoint
+            quote_url = f"{self.base_url}/api/quote-equity?symbol={symbol}"
+
+            # First, get the main page to establish session
+            session_response = self.fetch_page(f"{self.base_url}/get-quotes/equity?symbol={symbol}")
+
+            # Now get quote data
+            response = self.fetch_page(quote_url)
+
+            if response:
+                data = response.json()
+
+                # Extract quote information
+                quote = {
+                    'symbol': symbol,
+                    'company_name': data.get('info', {}).get('companyName', ''),
+                    'industry': data.get('info', {}).get('industry', ''),
+                    'isin': data.get('info', {}).get('isin', ''),
+
+                    # Price data
+                    'last_price': data.get('priceInfo', {}).get('lastPrice', 0),
+                    'change': data.get('priceInfo', {}).get('change', 0),
+                    'pChange': data.get('priceInfo', {}).get('pChange', 0),
+                    'previous_close': data.get('priceInfo', {}).get('previousClose', 0),
+                    'open': data.get('priceInfo', {}).get('open', 0),
+                    'close': data.get('priceInfo', {}).get('close', 0),
+                    'day_high': data.get('priceInfo', {}).get('intraDayHighLow', {}).get('max', 0),
+                    'day_low': data.get('priceInfo', {}).get('intraDayHighLow', {}).get('min', 0),
+                    'week_52_high': data.get('priceInfo', {}).get('weekHighLow', {}).get('max', 0),
+                    'week_52_low': data.get('priceInfo', {}).get('weekHighLow', {}).get('min', 0),
+
+                    # Volume data
+                    'total_traded_volume': data.get('preOpenMarket', {}).get('totalTradedVolume', 0),
+                    'total_traded_value': data.get('preOpenMarket', {}).get('totalTradedValue', 0),
+
+                    # Market depth
+                    'upper_circuit': data.get('priceInfo', {}).get('upperCP', 0),
+                    'lower_circuit': data.get('priceInfo', {}).get('lowerCP', 0),
+
+                    # Additional info
+                    'market_cap': data.get('metadata', {}).get('marketCap', 0),
+                    'pe_ratio': data.get('metadata', {}).get('pdSymbolPe', 0),
+                    'dividend_yield': data.get('metadata', {}).get('dividendYield', 0),
+                    'book_value': data.get('metadata', {}).get('bookValue', 0),
+                    'face_value': data.get('metadata', {}).get('faceValue', 0),
+
+                    # Delivery data
+                    'delivery_percentage': data.get('securityWiseDP', {}).get('deliveryToTradedQuantity', 0),
+                    'delivery_quantity': data.get('securityWiseDP', {}).get('deliveryQuantity', 0),
+
+                    'source': 'NSE',
+                    'scraped_at': datetime.now().isoformat()
+                }
+
+                self.logger.info(f"Successfully fetched quote for {symbol}")
+                return quote
+
+        except Exception as e:
+            self.logger.error(f"Error fetching quote for {symbol}: {e}")
+
+        return None
+
+    def search_symbols(self, query: str) -> List[Dict[str, Any]]:
+        """
+        Search for symbols matching a query
+
+        Args:
+            query: Search query (partial symbol or company name)
+
+        Returns:
+            List of matching symbols with basic info
+        """
+        self.logger.info(f"Searching for symbols matching: {query}")
+
+        matches = []
+        query = query.upper().strip()
+
+        try:
+            # NSE Search API
+            search_url = f"{self.base_url}/api/search/autocomplete?q={query}"
+            response = self.fetch_page(search_url)
+
+            if response:
+                data = response.json()
+
+                # Handle different response formats
+                if isinstance(data, dict) and 'symbols' in data:
+                    results = data['symbols']
+                elif isinstance(data, list):
+                    results = data
+                else:
+                    results = []
+
+                for item in results:
+                    match = {
+                        'symbol': item.get('symbol', ''),
+                        'company_name': item.get('symbol_info', item.get('companyName', '')),
+                        'result_type': item.get('result_type', 'equity'),
+                        'source': 'NSE'
+                    }
+                    matches.append(match)
+
+                self.logger.info(f"Found {len(matches)} matches for '{query}'")
+
+        except Exception as e:
+            self.logger.error(f"Error searching symbols: {e}")
+
+            # Fallback: Search in cached securities list
+            try:
+                securities = self.scrape_equity_securities()
+                for sec in securities:
+                    symbol = sec.get('symbol', '')
+                    company = sec.get('company_name', '')
+                    if query in symbol or query in company.upper():
+                        matches.append({
+                            'symbol': symbol,
+                            'company_name': company,
+                            'result_type': 'equity',
+                            'source': 'NSE'
+                        })
+                        if len(matches) >= 10:  # Limit to 10 results
+                            break
+            except:
+                pass
+
+        return matches
+
 
 if __name__ == "__main__":
     # Example usage

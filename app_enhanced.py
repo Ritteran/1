@@ -19,6 +19,7 @@ from io import BytesIO
 from nse_scraper import NSEScraper
 from bse_scraper import BSEScraper
 from data_processor import DataProcessor
+from stock_analyzer import StockAnalyzer
 import config
 
 # Import NIFTY 50 analyzer modules
@@ -260,6 +261,388 @@ def scraper_tab():
                         )
                     else:
                         st.write(data)
+
+
+def stock_search_tab():
+    """Interactive Stock Search and Analysis Tab"""
+    st.header("🔍 Stock Search & Analysis")
+    st.write("Search for any stock and get instant analysis with live metrics")
+
+    # Initialize scraper and analyzer
+    scraper = NSEScraper()
+    analyzer = StockAnalyzer()
+
+    # Search bar
+    col_search, col_button = st.columns([4, 1])
+
+    with col_search:
+        search_query = st.text_input(
+            "Search Symbol or Company Name",
+            placeholder="e.g., HDFCBANK, Reliance, TCS...",
+            key="stock_search"
+        )
+
+    with col_button:
+        st.write("")  # Spacer
+        st.write("")  # Spacer
+        search_button = st.button("🔍 Search", type="primary", use_container_width=True)
+
+    # Quick access buttons for popular stocks
+    st.write("**Quick Access:**")
+    quick_stocks = ['HDFCBANK', 'RELIANCE', 'TCS', 'INFY', 'ICICIBANK', 'HINDUNILVR', 'ITC', 'SBIN', 'BAJFINANCE', 'BHARTIARTL']
+
+    cols = st.columns(5)
+    for i, symbol in enumerate(quick_stocks):
+        if cols[i % 5].button(symbol, key=f"quick_{symbol}"):
+            search_query = symbol
+            search_button = True
+
+    st.divider()
+
+    # Perform search when button clicked or query entered
+    if search_button and search_query:
+        with st.spinner(f"🔍 Searching for '{search_query}'..."):
+            # Get quote data
+            quote = scraper.get_symbol_quote(search_query.upper().strip())
+
+            if quote:
+                # Perform analysis
+                analysis = analyzer.analyze_quote(quote)
+
+                # Display results
+                st.success(f"✅ Found: {quote['company_name']}")
+
+                # Basic Info Section
+                st.subheader(f"📊 {analysis['basic_info']['symbol']} - {analysis['basic_info']['company_name']}")
+
+                col_info1, col_info2 = st.columns(2)
+                with col_info1:
+                    st.write(f"**Industry:** {analysis['basic_info']['industry']}")
+                with col_info2:
+                    st.write(f"**ISIN:** {analysis['basic_info']['isin']}")
+
+                st.divider()
+
+                # Key Metrics Cards
+                st.subheader("💹 Key Metrics")
+
+                price_analysis = analysis['price_analysis']
+                valuation = analysis['valuation']
+                signals = analysis['signals']
+
+                col1, col2, col3, col4 = st.columns(4)
+
+                # Price card
+                with col1:
+                    price = price_analysis['last_price']
+                    change = price_analysis['pChange']
+                    emoji = "🟢" if change > 0 else "🔴" if change < 0 else "⚪"
+                    st.metric(
+                        "Last Price",
+                        f"₹{price:,.2f}",
+                        f"{change:+.2f}%",
+                        delta_color="normal" if change >= 0 else "inverse"
+                    )
+
+                # Signal card
+                with col2:
+                    signal = signals['overall_signal']
+                    confidence = signals['confidence_score']
+                    signal_color = {
+                        'BUY': '🟢',
+                        'ACCUMULATE': '🔵',
+                        'HOLD': '⚪',
+                        'REDUCE': '🟠',
+                        'SELL': '🔴'
+                    }.get(signal, '⚪')
+                    st.metric(
+                        "Signal",
+                        f"{signal_color} {signal}",
+                        f"Confidence: {confidence}"
+                    )
+
+                # Volume card
+                with col3:
+                    volume_data = analysis['volume_analysis']
+                    volume_cr = volume_data['volume'] / 10000000  # Convert to Cr
+                    st.metric(
+                        "Volume",
+                        f"{volume_cr:.2f} Cr",
+                        f"Delivery: {volume_data['delivery_percentage']:.1f}%"
+                    )
+
+                # Market Cap card
+                with col4:
+                    mcap = valuation['market_cap']
+                    mcap_cr = mcap / 100 if mcap > 0 else 0
+                    st.metric(
+                        "Market Cap",
+                        f"₹{mcap_cr:,.0f} Cr",
+                        valuation['market_cap_category']
+                    )
+
+                st.divider()
+
+                # Price Analysis Section
+                col_left, col_right = st.columns([1, 1])
+
+                with col_left:
+                    st.subheader("📈 Price Analysis")
+
+                    # Day range
+                    day_range_pct = price_analysis['day_range_pct']
+                    st.write("**Today's Range:**")
+                    st.progress(day_range_pct / 100)
+                    st.write(f"Position: {day_range_pct:.1f}% of day's range")
+
+                    # 52-week range
+                    week_52_pct = price_analysis['week_52_range_pct']
+                    st.write("**52-Week Range:**")
+                    st.progress(week_52_pct / 100)
+                    st.write(f"Position: {week_52_pct:.1f}% of 52-week range")
+
+                    # Distances
+                    st.write(f"**Distance from 52W High:** {price_analysis['distance_from_52w_high']:.2f}%")
+                    st.write(f"**Distance from 52W Low:** {price_analysis['distance_from_52w_low']:.2f}%")
+                    st.write(f"**Intraday Gain:** {price_analysis['intraday_gain']:.2f}%")
+
+                with col_right:
+                    st.subheader("💡 Signals & Insights")
+
+                    # Overall signal with explanation
+                    signal_emoji = {
+                        'BUY': '🟢',
+                        'ACCUMULATE': '🔵',
+                        'HOLD': '⚪',
+                        'REDUCE': '🟠',
+                        'SELL': '🔴'
+                    }.get(signals['overall_signal'], '⚪')
+
+                    st.markdown(f"### {signal_emoji} {signals['overall_signal']}")
+                    st.write(f"**Confidence Score:** {signals['confidence_score']}")
+
+                    # Individual signals
+                    if signals['signals']:
+                        st.write("**Key Indicators:**")
+                        for signal in signals['signals']:
+                            st.write(f"• {signal}")
+                    else:
+                        st.info("No significant signals detected")
+
+                st.divider()
+
+                # Valuation & Technical Section
+                col_val, col_tech = st.columns([1, 1])
+
+                with col_val:
+                    st.subheader("💰 Valuation Metrics")
+
+                    val_data = [
+                        ("P/E Ratio", f"{valuation['pe_ratio']:.2f}" if valuation['pe_ratio'] > 0 else "N/A"),
+                        ("P/B Ratio", f"{valuation['pb_ratio']:.2f}" if valuation['pb_ratio'] > 0 else "N/A"),
+                        ("Dividend Yield", f"{valuation['dividend_yield']:.2f}%" if valuation['dividend_yield'] > 0 else "N/A"),
+                        ("Book Value", f"₹{valuation['book_value']:.2f}" if valuation['book_value'] > 0 else "N/A"),
+                        ("Face Value", f"₹{valuation['face_value']:.2f}" if valuation['face_value'] > 0 else "N/A"),
+                    ]
+
+                    for label, value in val_data:
+                        col_a, col_b = st.columns([2, 1])
+                        col_a.write(f"**{label}:**")
+                        col_b.write(value)
+
+                    # Valuation assessment
+                    assessment = valuation['valuation_assessment']
+                    assessment_color = {
+                        'Undervalued': '🟢',
+                        'Fairly Valued': '🟡',
+                        'Overvalued': '🟠',
+                        'Highly Overvalued': '🔴',
+                        'Unknown': '⚪'
+                    }.get(assessment, '⚪')
+                    st.info(f"{assessment_color} Assessment: **{assessment}**")
+
+                with col_tech:
+                    st.subheader("📊 Technical Indicators")
+
+                    tech = analysis['technical_indicators']
+
+                    tech_data = [
+                        ("Price Momentum", f"{tech['price_momentum']:+.2f}%"),
+                        ("Support Level", f"₹{tech['support_level']:.2f}"),
+                        ("Resistance Level", f"₹{tech['resistance_level']:.2f}"),
+                        ("Pivot Point", f"₹{tech['pivot_point']:.2f}"),
+                        ("From Support", f"{tech['distance_from_support']:.2f}%"),
+                        ("To Resistance", f"{tech['distance_from_resistance']:.2f}%"),
+                    ]
+
+                    for label, value in tech_data:
+                        col_a, col_b = st.columns([2, 1])
+                        col_a.write(f"**{label}:**")
+                        col_b.write(value)
+
+                st.divider()
+
+                # Risk Analysis Section
+                st.subheader("⚠️ Risk Analysis")
+
+                risk = analysis['risk_metrics']
+
+                col_risk1, col_risk2, col_risk3 = st.columns(3)
+
+                with col_risk1:
+                    risk_color = {
+                        'Low': '🟢',
+                        'Moderate': '🟡',
+                        'High': '🟠',
+                        'Very High': '🔴'
+                    }.get(risk['risk_level'], '⚪')
+                    st.metric("Risk Level", f"{risk_color} {risk['risk_level']}")
+
+                with col_risk2:
+                    st.metric("Intraday Volatility", f"{risk['intraday_volatility']:.2f}%")
+
+                with col_risk3:
+                    if risk['circuit_warnings']:
+                        for warning in risk['circuit_warnings']:
+                            st.warning(warning)
+                    else:
+                        st.success("✅ No circuit warnings")
+
+                # Volume Analysis
+                st.divider()
+                st.subheader("📊 Volume & Delivery Analysis")
+
+                vol = analysis['volume_analysis']
+
+                col_vol1, col_vol2, col_vol3 = st.columns(3)
+
+                with col_vol1:
+                    st.metric("Total Volume", f"{vol['volume']/10000000:.2f} Cr")
+
+                with col_vol2:
+                    st.metric("Traded Value", f"₹{vol['value']/10000000:.0f} Cr")
+
+                with col_vol3:
+                    delivery_emoji = "💪" if vol['delivery_strength'] == 'Strong' else "📊" if vol['delivery_strength'] == 'Moderate' else "⚠️"
+                    st.metric("Delivery Strength", f"{delivery_emoji} {vol['delivery_strength']}")
+
+                # Export data
+                st.divider()
+                st.subheader("💾 Export Data")
+
+                # Prepare export data
+                export_data = {
+                    'Symbol': analysis['basic_info']['symbol'],
+                    'Company': analysis['basic_info']['company_name'],
+                    'Industry': analysis['basic_info']['industry'],
+                    'Last Price': price_analysis['last_price'],
+                    'Change %': price_analysis['pChange'],
+                    'Signal': signals['overall_signal'],
+                    'Confidence': signals['confidence_score'],
+                    'P/E Ratio': valuation['pe_ratio'],
+                    'Market Cap (Cr)': valuation['market_cap'] / 100,
+                    'Volume (Cr)': vol['volume'] / 10000000,
+                    'Delivery %': vol['delivery_percentage'],
+                    'Risk Level': risk['risk_level'],
+                    'Valuation': valuation['valuation_assessment']
+                }
+
+                df_export = pd.DataFrame([export_data])
+                csv = df_export.to_csv(index=False)
+
+                col_exp1, col_exp2 = st.columns(2)
+
+                with col_exp1:
+                    st.download_button(
+                        label="📥 Download Analysis (CSV)",
+                        data=csv,
+                        file_name=f"{analysis['basic_info']['symbol']}_analysis_{datetime.now().strftime('%Y%m%d')}.csv",
+                        mime="text/csv"
+                    )
+
+                with col_exp2:
+                    # Create summary text
+                    summary_text = f"""
+Stock Analysis Summary - {analysis['basic_info']['symbol']}
+Company: {analysis['basic_info']['company_name']}
+Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Price Information:
+- Last Price: ₹{price_analysis['last_price']:.2f}
+- Change: {price_analysis['pChange']:+.2f}%
+- Day Range: {price_analysis['day_range_pct']:.1f}%
+
+Trading Signal: {signals['overall_signal']} (Confidence: {signals['confidence_score']})
+
+Key Indicators:
+{chr(10).join('- ' + s for s in signals['signals'])}
+
+Valuation:
+- P/E Ratio: {valuation['pe_ratio']:.2f}
+- Assessment: {valuation['valuation_assessment']}
+- Market Cap: ₹{valuation['market_cap']/100:.0f} Cr
+
+Risk Level: {risk['risk_level']}
+Delivery %: {vol['delivery_percentage']:.1f}%
+
+---
+Generated by NSE/BSE Market Data Application
+                    """
+
+                    st.download_button(
+                        label="📥 Download Summary (TXT)",
+                        data=summary_text,
+                        file_name=f"{analysis['basic_info']['symbol']}_summary_{datetime.now().strftime('%Y%m%d')}.txt",
+                        mime="text/plain"
+                    )
+
+            else:
+                st.error(f"❌ Could not find data for '{search_query}'")
+                st.info("💡 Try searching by exact symbol (e.g., HDFCBANK, RELIANCE, TCS)")
+
+                # Suggest similar symbols
+                with st.spinner("Searching for similar symbols..."):
+                    matches = scraper.search_symbols(search_query)
+                    if matches:
+                        st.write("**Did you mean:**")
+                        for match in matches[:5]:
+                            if st.button(f"{match['symbol']} - {match.get('company_name', 'N/A')}", key=f"suggest_{match['symbol']}"):
+                                st.rerun()
+
+    elif not search_query:
+        # Show welcome message and instructions
+        st.info("👆 Enter a stock symbol or company name above to get started")
+
+        st.write("### 🚀 How to Use:")
+        st.write("1. **Type a symbol** (e.g., HDFCBANK) or company name in the search box")
+        st.write("2. **Click Search** or press Enter")
+        st.write("3. **View comprehensive analysis** with live metrics and signals")
+        st.write("4. **Export data** to CSV or text file for further analysis")
+
+        st.write("### 📊 What You Get:")
+        col_feat1, col_feat2 = st.columns(2)
+
+        with col_feat1:
+            st.write("**Price Analysis:**")
+            st.write("• Real-time price and changes")
+            st.write("• Day and 52-week ranges")
+            st.write("• Support/Resistance levels")
+
+            st.write("**Trading Signals:**")
+            st.write("• Buy/Sell/Hold recommendations")
+            st.write("• Confidence scores")
+            st.write("• Key indicators")
+
+        with col_feat2:
+            st.write("**Valuation Metrics:**")
+            st.write("• P/E and P/B ratios")
+            st.write("• Market cap category")
+            st.write("• Dividend yield")
+
+            st.write("**Risk Analysis:**")
+            st.write("• Volatility assessment")
+            st.write("• Delivery percentage")
+            st.write("• Circuit warnings")
 
 
 def data_loader_tab():
@@ -1034,8 +1417,9 @@ def main():
                 unsafe_allow_html=True)
 
     # Create tabs
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "📥 Scraper",
+        "🔍 Stock Search",
         "📂 Data Loader",
         "⚙️ Processor",
         "📊 Visualization",
@@ -1047,18 +1431,21 @@ def main():
         scraper_tab()
 
     with tab2:
-        data_loader_tab()
+        stock_search_tab()
 
     with tab3:
-        data_processor_tab()
+        data_loader_tab()
 
     with tab4:
-        visualization_tab()
+        data_processor_tab()
 
     with tab5:
-        analytics_tab()
+        visualization_tab()
 
     with tab6:
+        analytics_tab()
+
+    with tab7:
         nifty50_analyzer_tab()
 
     # Footer
