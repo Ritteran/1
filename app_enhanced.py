@@ -109,6 +109,8 @@ def scraper_tab():
         nse_options = {}
         if exchange in ["Both NSE & BSE", "NSE Only"]:
             st.markdown("**NSE:**")
+            nse_options['equity_securities'] = st.checkbox("Equity Securities/Instruments", value=False, key="nse_sec")
+            nse_options['nifty_indices'] = st.checkbox("NIFTY Indices", value=False, key="nse_idx")
             nse_options['circulars'] = st.checkbox("Circulars", value=True, key="nse_circ")
             nse_options['reports'] = st.checkbox("Daily Reports", value=True, key="nse_rep")
             nse_options['announcements'] = st.checkbox("Announcements", value=False, key="nse_ann")
@@ -144,6 +146,20 @@ def scraper_tab():
                 if exchange in ["Both NSE & BSE", "NSE Only"]:
                     with st.spinner("Scraping NSE data..."):
                         nse_scraper = NSEScraper()
+
+                        if nse_options.get('equity_securities'):
+                            status_text.text("📊 Fetching NSE equity securities/instruments...")
+                            securities = nse_scraper.scrape_equity_securities()
+                            if securities:
+                                all_results['NSE_Equity_Securities'] = securities
+                                nse_scraper.save_to_file(securities, 'nse_equity_securities.json', 'json')
+
+                        if nse_options.get('nifty_indices'):
+                            status_text.text("📈 Fetching NIFTY indices...")
+                            indices = nse_scraper.get_all_nifty_indices()
+                            if indices:
+                                all_results['NSE_NIFTY_Indices'] = indices
+                                nse_scraper.save_to_file(indices, 'nse_nifty_indices.json', 'json')
 
                         if nse_options.get('circulars'):
                             status_text.text("📄 Fetching NSE circulars...")
